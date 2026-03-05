@@ -65,7 +65,3 @@ The system consists of the following AWS components:
     ```powershell
     docker run --rm -v .\infra\tf\:/app --env-file .\infra\tools\.env user/terraform:latest output -json > tf_outputs.json
     ```
-
-## Usage
-
-To submit a book request, send a POST request to the API endpoint with a JSON body containing `title`, `isbn`, and `requestEmail`.
