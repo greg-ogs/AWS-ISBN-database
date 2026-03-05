@@ -1,0 +1,53 @@
+name: Deploy to AWS with Terraform
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    name: Deploy with Terraform
+    runs-on: ubuntu-latest
+    environment: production
+    
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Zip
+      run: sudo apt-get install zip -y
+
+    - name: Build Lambda Packages
+      run: |
+        chmod +x build_lambdas.sh
+        ./build_lambdas.sh
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-1
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.0
+
+    - name: Terraform Init
+      working-directory: infra/tf
+      run: terraform init
+
+    - name: Terraform Apply
+      working-directory: infra/tf
+      run: terraform apply -auto-approve
