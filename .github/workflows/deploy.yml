@@ -37,6 +37,10 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+    - name: Download Terraform State
+      run: |
+        aws s3 cp s3://book-tf-state/terraform.tfstate infra/tf/terraform.tfstate || echo "State file not found, skipping download"
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
@@ -49,3 +53,8 @@ jobs:
     - name: Terraform Apply
       working-directory: infra/tf
       run: terraform apply -auto-approve
+
+    - name: Upload Terraform State
+      if: always()
+      run: |
+        aws s3 cp infra/tf/terraform.tfstate s3://book-tf-state/terraform.tfstate
