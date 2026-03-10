@@ -88,7 +88,6 @@ def lambda_handler(event, context):
                 'request_title': title,
                 'request_isbn': isbn,
                 'request_email': request_email,
-                'status': 'pending_review',
                 **additional_details
             }
 
