@@ -37,7 +37,7 @@ def get_api_endpoint_from_json():
         print(f"An unexpected error occurred while reading the output file: {e}", file=sys.stderr)
         return None
 
-def send_book_request(endpoint, title, isbn, email):
+def send_book_request(endpoint, title, isbn, email, api_key):
     """
     Sends a book request to the specified API Gateway endpoint.
     """
@@ -46,7 +46,10 @@ def send_book_request(endpoint, title, isbn, email):
         "isbn": isbn,
         "requestEmail": email
     }
-    headers = {'Content-Type': 'application/json'}
+    headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': api_key
+    }
 
     print(f"\nSending POST request to: {endpoint}")
     print(f"Payload: {json.dumps(payload, indent=2)}")
@@ -77,10 +80,26 @@ def main():
     args = parser.parse_args()
 
     api_endpoint = get_api_endpoint_from_json()
-    if api_endpoint:
-        send_book_request(api_endpoint, args.title, args.isbn, args.email)
-    else:
+    if not api_endpoint:
         sys.exit(1)
+
+    # Load API Key from environment or .env file manually
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    env_path = os.path.join(script_dir, '.env')
+    
+    api_key = os.environ.get("API_KEY")
+    if not api_key and os.path.exists(env_path):
+        with open(env_path, 'r') as f:
+            for line in f:
+                if line.startswith("API_KEY="):
+                    api_key = line.strip().split("=", 1)[1].strip('\'"')
+                    break
+
+    if not api_key:
+         print("Error: API_KEY not found in environment variables or .env file.", file=sys.stderr)
+         sys.exit(1)
+
+    send_book_request(api_endpoint, args.title, args.isbn, args.email, api_key)
 
 if __name__ == "__main__":
     main()
