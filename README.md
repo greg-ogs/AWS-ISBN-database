@@ -2,6 +2,8 @@
 
 This project implements a serverless architecture on AWS to process book requests. It allows users to submit a book request (via ISBN) through an API Gateway, which triggers a producer Lambda function to send the request to an SQS queue. A consumer Lambda function then processes the message, fetches additional book details from the Open Library API, and stores the result in a DynamoDB table.
 
+[!Note]
+No GUI is available by the moment.
 ## Architecture Overview
 
 The system consists of the following AWS components:
